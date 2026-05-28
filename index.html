@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strategic Network: Absolute Victory</title>
+    <title>Strategic Network: Ultimate Victory Arena</title>
     <style>
         :root {
             --bg-color: #0d1117;
@@ -27,22 +27,22 @@
         .container {
             text-align: center;
             background: var(--panel-bg);
-            padding: 25px;
+            padding: 20px;
             border-radius: 16px;
             border: 1px solid var(--border-color);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            max-width: 650px;
+            max-width: 600px;
             width: 100%;
             position: relative;
             z-index: 10;
         }
-        h1 { font-size: 24px; letter-spacing: 2px; color: #ffffff; margin: 0 0 5px 0; text-transform: uppercase; }
-        .subtitle { font-size: 11px; color: #8b949e; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        h1 { font-size: 22px; letter-spacing: 2px; color: #ffffff; margin: 0 0 5px 0; text-transform: uppercase; }
+        .subtitle { font-size: 11px; color: #8b949e; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
         #status-panel {
             background: rgba(0,0,0,0.3);
-            padding: 12px;
+            padding: 10px;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 13px;
             border-left: 4px solid var(--accent-gold);
             margin-bottom: 15px;
             text-align: left;
@@ -56,31 +56,31 @@
         .piece-user { fill: url(#goldGradient); filter: drop-shadow(0px 3px 4px rgba(0,0,0,0.6)); cursor: pointer; }
         .piece-ai { fill: url(#blueGradient); filter: drop-shadow(0px 3px 4px rgba(0,0,0,0.6)); cursor: pointer; }
         
-        /* 全屏礼花画布 */
         #fireworks {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
             z-index: 999;
         }
-        /* 狂欢祝贺弹窗 */
         #victory-modal {
             display: none;
             position: fixed;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             background: radial-gradient(circle, #1a1f29 0%, #0a0d14 100%);
-            border: 2px solid var(--accent-gold);
+            border: 3px solid var(--accent-gold);
             padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 0 50px rgba(212, 175, 55, 0.6);
+            box-shadow: 0 0 60px rgba(212, 175, 55, 0.8);
             z-index: 1000;
             text-align: center;
             animation: popup 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         @keyframes popup { from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
-        #victory-modal h2 { color: var(--accent-gold); font-size: 32px; margin: 0 0 10px 0; text-shadow: 0 0 10px rgba(212,175,55,0.5); }
-        #victory-modal p { font-size: 18px; color: #ffffff; line-height: 1.6; }
+        #victory-modal h2 { color: var(--accent-gold); font-size: 36px; margin: 0 0 15px 0; text-shadow: 0 0 15px rgba(212,175,55,0.6); }
+        #victory-modal p { font-size: 20px; color: #ffffff; line-height: 1.8; margin-bottom: 20px; }
+        .restart-btn { background: var(--accent-gold); color: #000; border: none; padding: 10px 25px; font-weight: bold; font-size: 16px; border-radius: 8px; cursor: pointer; transition: transform 0.2s; }
+        .restart-btn:hover { transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -89,13 +89,13 @@
 
 <div class="container">
     <h1>Strategic Network</h1>
-    <div class="subtitle">Cosmic Grid Matrix // Tactical Duel Protocol</div>
+    <div class="subtitle">10-Piece Tactical Grid Arena</div>
     
     <div id="status-panel">
-        <span style="color: #8b949e;">[SYSTEM]</span> <span id="status-text">链路畅通。请选择金色核心开始推进。</span>
+        <span style="color: #8b949e;">[SYSTEM]</span> <span id="status-text">终极修正版就绪。双方各有10个棋子，请指派底部的金色核心。</span>
     </div>
 
-    <svg id="board-svg" width="560" height="600" viewBox="0 0 560 600">
+    <svg id="board-svg" width="560" height="580" viewBox="0 0 560 580">
         <defs>
             <radialGradient id="goldGradient" cx="30%" cy="30%" r="70%">
                 <stop offset="0%" stop-color="#fff3ad" />
@@ -115,7 +115,8 @@
 
 <div id="victory-modal">
     <h2>🎉 恭喜长官！达成至高胜利！ 🎉</h2>
-    <p>🏆 战术网络分析：您展现了完美无瑕的统帅级操作！<br><span style="color: var(--accent-gold); font-weight: bold;">全网最高算力向您的智慧致敬！🎇🎆</span></p >
+    <p>🏆 战术网络分析：您展现了完美无瑕的统帅级操作！<br><span style="color: var(--accent-gold); font-weight: bold;">10个金色核心已全部完美攻占顶端老巢！最高算力向您的智慧致敬！🎇🎆</span></p>
+    <button class="restart-btn" onclick="location.reload()">再来一局</button>
 </div>
 
 <script>
@@ -126,9 +127,10 @@
 
     const nodes = [];
     let idCounter = 0;
-    const R = 23; 
-    const cx = 280; const cy = 300;
+    const R = 22; 
+    const cx = 280; const cy = 290;
 
+    // 17行绝对完美六角星点位映射
     const starLayout = [
         {r: 0, count: 1, start: 0}, {r: 1, count: 2, start: -0.5}, {r: 2, count: 3, start: -1}, {r: 3, count: 4, start: -1.5},
         {r: 4, count: 13, start: -6}, {r: 5, count: 12, start: -5.5}, {r: 6, count: 11, start: -5}, {r: 7, count: 10, start: -4.5},
@@ -142,14 +144,17 @@
         const y = cy + (rowInfo.r - 8) * dy;
         for (let i = 0; i < rowInfo.count; i++) {
             const x = cx + (rowInfo.start + i) * (R * 2);
+            
+            // 【棋子和目标槽完美绑定】
             let piece = null;
-            if (rowInfo.r <= 3) piece = 'AI';       
-            if (rowInfo.r >= 13) piece = 'USER';    
+            if (rowInfo.r <= 3) piece = 'AI';       // 顶部4行正好是 1+2+3+4 = 10 个蓝色AI棋子
+            if (rowInfo.r >= 13) piece = 'USER';    // 底部4行正好是 4+3+2+1 = 10 个金色玩家棋子
 
             nodes.push({ id: idCounter++, x, y, row: rowInfo.r, col: i, piece });
         }
     });
 
+    // 建立标准6向邻居网络
     for (let i = 0; i < nodes.length; i++) {
         nodes[i].neighbors = [];
         for (let j = 0; j < nodes.length; j++) {
@@ -161,13 +166,16 @@
         }
     }
 
+    // 绘制连线
     nodes.forEach(n => {
         n.neighbors.forEach(nb => {
-            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            line.setAttribute("x1", n.x); line.setAttribute("y1", n.y);
-            line.setAttribute("x2", nb.x); line.setAttribute("y2", nb.y);
-            line.setAttribute("stroke", "#1c212b"); line.setAttribute("stroke-width", "1");
-            linesLayer.appendChild(line);
+            if (n.id < nb.id) {
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", n.x); line.setAttribute("y1", n.y);
+                line.setAttribute("x2", nb.x); line.setAttribute("y2", nb.y);
+                line.setAttribute("stroke", "#1c212b"); line.setAttribute("stroke-width", "1");
+                linesLayer.appendChild(line);
+            }
         });
     });
 
@@ -177,7 +185,7 @@
         slotsLayer.innerHTML = '';
         nodes.forEach(n => {
             const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("cx", n.x); circle.setAttribute("cy", n.y); circle.setAttribute("r", 12);
+            circle.setAttribute("cx", n.x); circle.setAttribute("cy", n.y); circle.setAttribute("r", 11);
             circle.setAttribute("class", "slot");
             if (selectedNode === n) circle.classList.add('selected');
             if (validMoves.includes(n)) circle.classList.add('valid-target');
@@ -194,6 +202,7 @@
         });
     }
 
+    // 完美深度连跳算法
     function getValidMoves(startNode) {
         let moves = [];
         startNode.neighbors.forEach(nb => { if (!nb.piece) moves.push(nb); });
@@ -216,20 +225,23 @@
     function handleNodeClick(node) {
         if (node.piece === 'USER') {
             selectedNode = node; validMoves = getValidMoves(node);
-            statusText.innerText = `核心路径就绪，请指派目标。`; render();
+            statusText.innerText = `核心路径就绪，请选择目标。`; render();
         } else if (validMoves.includes(node) && selectedNode) {
             node.piece = 'USER'; selectedNode.piece = null;
             selectedNode = null; validMoves = []; render();
+            
+            // 每次走完，严格检查是否把顶部的10个格子全部占满
             if (checkUserVictory()) { triggerVictory(); return; }
-            statusText.innerText = "[SYSTEM] 智能核心同步算力中...";
-            setTimeout(triggerAIMove, 300);
+            
+            statusText.innerText = "[SYSTEM] 决策网格同步中...";
+            setTimeout(triggerAIMove, 250);
         }
     }
 
+    // 【硬核胜利判定】检查行数 row <= 3 的 10个格子里，是不是有 10个全是你的金色棋子
     function checkUserVictory() {
-        // 判断底部的10个初始位是否全部没有USER棋子，且顶部的10个位充满了USER棋子
-        const targetAIOslots = nodes.filter(n => n.row <= 3);
-        const userPiecesInTarget = targetAIOslots.filter(n => n.piece === 'USER').length;
+        const targetSlots = nodes.filter(n => n.row <= 3);
+        const userPiecesInTarget = targetSlots.filter(n => n.piece === 'USER').length;
         return userPiecesInTarget === 10;
     }
 
@@ -244,12 +256,11 @@
 
         if (allPossibleMoves.length === 0) return;
 
-        // 强力放水：绝对不允许AI进入底部的玩家老巢大杀特杀，并且在所有走法中，疯狂挑选最能给玩家搭桥、且不造成任何威胁的走法
+        // AI拼命给你在中场排队搭桥，且绝对不会进入你的底部老巢偷家
         allPossibleMoves.forEach(move => {
             let bridgeScore = 0;
-            move.to.neighbors.forEach(nb => { if (nb.piece === 'USER') bridgeScore += 30; }); // 疯狂倒贴玩家
-            // 如果这个走法会阻挡玩家的前进路线，直接扣大分
-            if (move.to.row > 12) bridgeScore -= 100; 
+            move.to.neighbors.forEach(nb => { if (nb.piece === 'USER') bridgeScore += 45; }); 
+            if (move.to.row >= 13) bridgeScore -= 400; 
             move.score = move.progress + bridgeScore;
         });
 
@@ -258,10 +269,12 @@
 
         chosenMove.to.piece = 'AI'; chosenMove.from.piece = null;
         render();
-        statusText.innerText = "[SYSTEM] 节点已更新。等待您的下一步战术。";
+        
+        if (checkUserVictory()) { triggerVictory(); return; }
+        statusText.innerText = "[SYSTEM] 节点更新。等待您的下一步战术。";
     }
 
-    // 华丽礼花特效核心
+    // 华丽满屏礼花渲染引擎
     const canvas = document.getElementById('fireworks');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -269,15 +282,15 @@
     window.addEventListener('resize', resizeCanvas); resizeCanvas();
 
     function createFirework(x, y) {
-        const colors = ['#d4af37', '#ff4d4f', '#58a6ff', '#52c41a', '#fadb14', '#722ed1'];
+        const colors = ['#d4af37', '#ff4d4f', '#58a6ff', '#52c41a', '#fadb14', '#722ed1', '#ffffff'];
         const color = colors[Math.floor(Math.random() * colors.length)];
-        for (let i = 0; i < 60; i++) {
+        for (let i = 0; i < 80; i++) {
             particles.push({
                 x: x, y: y,
                 angle: Math.random() * Math.PI * 2,
-                speed: Math.random() * 5 + 2,
-                friction: 0.95, gravity: 0.1,
-                alpha: 1, decay: Math.random() * 0.015 + 0.01,
+                speed: Math.random() * 7 + 2,
+                friction: 0.94, gravity: 0.15,
+                alpha: 1, decay: Math.random() * 0.015 + 0.005,
                 color: color
             });
         }
@@ -285,7 +298,7 @@
 
     function animateFireworks() {
         requestAnimationFrame(animateFireworks);
-        ctx.fillStyle = 'rgba(13, 17, 23, 0.2)';
+        ctx.fillStyle = 'rgba(13, 17, 23, 0.25)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         for (let i = particles.length - 1; i >= 0; i--) {
@@ -302,9 +315,10 @@
         statusText.innerText = "🏆 CRITICAL VICTORY DETECTED! 🎉";
         victoryModal.style.display = 'block';
         animateFireworks();
+        // 疯狂生成密集礼花弹
         setInterval(() => {
             createFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.6);
-        }, 300);
+        }, 200);
     }
 
     render();
