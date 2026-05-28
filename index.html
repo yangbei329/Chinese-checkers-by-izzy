@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategic Network: Core</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --panel-bg: #161b22;
+            --accent-gold: #d4af37;
+            --accent-blue: #58a6ff;
+            --border-color: #30363d;
+        }
+        body {
+            margin: 0;
+            background-color: var(--bg-color);
+            color: #c9d1d9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .container {
+            text-align: center;
+            background: var(--panel-bg);
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 24px;
+            letter-spacing: 2px;
+            color: #ffffff;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        .subtitle {
+            font-size: 12px;
+            color: #8b949e;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        #status-panel {
+            background: rgba(0,0,0,0.2);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            border-left: 4px solid var(--accent-gold);
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        svg {
+            background: #070a0e;
+            border-radius: 12px;
+            border: 1px solid #21262d;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+            max-width: 100%;
+            height: auto;
+        }
+        .slot { fill: #21262d; stroke: #30363d; stroke-width: 1; cursor: pointer; transition: all 0.3s; }
+        .slot:hover { fill: #30363d; }
+        .slot.selected { stroke: var(--accent-gold); stroke-width: 3; fill: #1f242c; }
+        .slot.valid-target { fill: rgba(88, 166, 255, 0.2); stroke: var(--accent-blue); stroke-dasharray: 4; }
+        .piece-user { fill: url(#goldGradient); filter: drop-shadow(0px 3px 5px rgba(0,0,0,0.5)); cursor: pointer; }
+        .piece-ai { fill: url(#blueGradient); filter: drop-shadow(0px 3px 5px rgba(0,0,0,0.5)); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Strategic Network</h1>
+    <div class="subtitle">Tactical Grid Simulation // System v1.0.4</div>
+    
+    <div id="status-panel">
+        <span style="color: #8b949e;">[SYSTEM STATUS]</span> <span id="status-text">初始化完成。等待接入...</span>
+    </div>
+
+    <svg id="board-svg" width="500" height="500" viewBox="0 0 500 500">
+        <defs>
+            <radialGradient id="goldGradient" cx="30%" cy="30%" r="70%">
+                <stop offset="0%" stop-color="#fff3ad" />
+                <stop offset="70%" stop-color="#d4af37" />
+                <stop offset="100%" stop-color="#aa8413" />
+            </radialGradient>
+            <radialGradient id="blueGradient" cx="30%" cy="30%" r="70%">
+                <stop offset="0%" stop-color="#a5d1ff" />
+                <stop offset="70%" stop-color="#388bfd" />
+                <stop offset="100%" stop-color="#0c44ac" />
+            </radialGradient>
+        </defs>
+        <g id="lines-layer"></g>
+        <g id="slots-layer"></g>
+    </svg>
+</div>
+
+<script>
+    const svg = document.getElementById('board-svg');
+    const slotsLayer = document.getElementById('slots-layer');
+    const linesLayer = document.getElementById('lines-layer');
+    const statusText = document.getElementById('status-text');
+
+    const nodes = [];
+    const nodeMap = new Map();
+    let idCounter = 0;
+
+    const rowCounts = [1, 2, 3, 4, 5, 4, 3, 2, 1];
+    const ySpacing = 45;
+    const xSpacing = 50;
+    const startY = 70;
+
+    rowCounts.forEach((count, rowIndex) => {
+        const startX = 250 - ((count - 1) * xSpacing) / 2;
+        for (let i = 0; i < count; i++) {
+            const x = startX + i * xSpacing;
+            const y = startY + rowIndex * ySpacing;
+            
+            let piece = null;
+            if (rowIndex <= 2) piece = 'AI';      
+            if (rowIndex >= 6) piece = 'USER';    
+
+            const node = { id: idCounter++, x, y, row: rowIndex, col: i, piece };
+            nodes.push(node);
+            nodeMap.set(`${rowIndex},${i}`, node);
+        }
+    });
+
+    nodes.forEach(n => {
+        n.neighbors = [];
+        const r = n.row;
+        const c = n.col;
+        
+        let tNeighbors = [];
+        if (r < 4) { 
+            tNeighbors = [[r-1, c-1], [r-1, c], [r, c-1], [r, c+1], [r+1, c], [r+1, c+1]];
+        } else if (r === 4) { 
+            tNeighbors = [[r-1, c-1], [r-1, c], [r, c-1], [r, c+1], [r+1, c-1], [r+1, c]];
+        } else { 
+            tNeighbors = [[r-1, c], [r-1, c+1], [r, c-1], [r, c+1], [r+1, c-1], [r+1, c]];
+        }
+
+        tNeighbors.forEach(([nr, nc]) => {
+            const target = nodeMap.get(`${nr},${nc}`);
+            if (target) n.neighbors.push(target);
+        });
+    });
+
+    const drawnLines = new Set();
+    nodes.forEach(n => {
+        n.neighbors.forEach(nb => {
+            const pairId = [n.id, nb.id].sort().join('-');
+            if (!drawnLines.has(pairId)) {
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", n.x); line.setAttribute("y1", n.y);
+                line.setAttribute("x2", nb.x); line.setAttribute("y2", nb.y);
+                line.setAttribute("stroke", "#1b2129");
+                line.setAttribute("stroke-width", "2");
+                linesLayer.appendChild(line);
+                drawnLines.add(pairId);
+            }
+        });
+    });
+
+    let selectedNode = null;
+    let validMoves = [];
+
+    function render() {
+        slotsLayer.innerHTML = '';
+        nodes.forEach(n => {
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", n.x);
+            circle.setAttribute("cy", n.y);
+            circle.setAttribute("r", 14);
+            circle.setAttribute("class", "slot");
+            
+            if (selectedNode === n) circle.classList.add('selected');
+            if (validMoves.includes(n)) circle.classList.add('valid-target');
+
+            circle.onclick = () => handleNodeClick(n);
+            slotsLayer.appendChild(circle);
+
+            if (n.piece) {
+                const piece = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                piece.setAttribute("cx", n.x);
+                piece.setAttribute("cy", n.y);
+                piece.setAttribute("r", 11);
+                piece.setAttribute("class", n.piece === 'USER' ? 'piece-user' : 'piece-ai');
+                piece.onclick = () => handleNodeClick(n);
+                slotsLayer.appendChild(piece);
+            }
+        });
+    }
+
+    function getValidMoves(node) {
+        let moves = [];
+        node.neighbors.forEach(nb => {
+            if (!nb.piece) moves.push(nb);
+        });
+        node.neighbors.forEach(nb => {
+            if (nb.piece) {
+                const dx = nb.x - node.x;
+                const dy = nb.y - node.y;
+                const targetNode = nodes.find(target => 
+                    Math.abs(target.x - (nb.x + dx)) < 5 && 
+                    Math.abs(target.y - (nb.y + dy)) < 5 && 
+                    !target.piece
+                );
+                if (targetNode) moves.push(targetNode);
+            }
+        });
+        return moves;
+    }
+
+    function handleNodeClick(node) {
+        if (statusText.innerText.includes("同步中")) return;
+
+        if (node.piece === 'USER') {
+            selectedNode = node;
+            validMoves = getValidMoves(node);
+            statusText.innerText = `已锁定序列 [${node.id}]，请选择目标信道。`;
+            render();
+        } else if (validMoves.includes(node) && selectedNode) {
+            node.piece = 'USER';
+            selectedNode.piece = null;
+            selectedNode = null;
+            validMoves = [];
+            render();
+            
+            statusText.innerText = "[SYSTEM] 决策网络正在同步算力...";
+            setTimeout(triggerAIMove, 600);
+        }
+    }
+
+    function triggerAIMove() {
+        let aiPieces = nodes.filter(n => n.piece === 'AI');
+        let allPossibleMoves = [];
+
+        aiPieces.forEach(p => {
+            let moves = getValidMoves(p);
+            moves.forEach(m => {
+                allPossibleMoves.push({ from: p, to: m });
+            });
+        });
+
+        if (allPossibleMoves.length === 0) {
+            statusText.innerText = "[SYSTEM] 分析完毕：用户路径已完全封锁。";
+            return;
+        }
+
+        // 放水核心：让AI把能大步往前跳的优秀走法扔到最后，专门挑原地踏步、横着走、或者后退的废柴步法
+        allPossibleMoves.sort((a, b) => {
+            const distA = a.to.y - a.from.y; 
+            const distB = b.to.y - b.from.y;
+            return distA - distB; 
+        });
+
+        const poolSize = Math.min(3, allPossibleMoves.length);
+        const chosenMove = allPossibleMoves[Math.floor(Math.random() * poolSize)];
+
+        chosenMove.to.piece = 'AI';
+        chosenMove.from.piece = null;
+        render();
+
+        statusText.innerText = "[SYSTEM] 节点已更新。轮到你进行战术调整。";
+    }
+
+    statusText.innerText = "[SYSTEM] 链路畅通。请选择金色核心开始推进。";
+    render();
+</script>
+
+</body>
+</html>
