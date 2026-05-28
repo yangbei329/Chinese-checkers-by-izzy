@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strategic Network: Sector 4321</title>
+    <title>Strategic Network: Absolute Victory</title>
     <style>
         :root {
             --bg-color: #0d1117;
@@ -22,6 +22,7 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            overflow: hidden;
         }
         .container {
             text-align: center;
@@ -30,40 +31,71 @@
             border-radius: 16px;
             border: 1px solid var(--border-color);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            max-width: 550px;
+            max-width: 650px;
             width: 100%;
+            position: relative;
+            z-index: 10;
         }
-        h1 { font-size: 22px; letter-spacing: 2px; color: #ffffff; margin: 0 0 5px 0; text-transform: uppercase; }
+        h1 { font-size: 24px; letter-spacing: 2px; color: #ffffff; margin: 0 0 5px 0; text-transform: uppercase; }
         .subtitle { font-size: 11px; color: #8b949e; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
         #status-panel {
             background: rgba(0,0,0,0.3);
             padding: 12px;
             border-radius: 8px;
-            font-size: 13px;
+            font-size: 14px;
             border-left: 4px solid var(--accent-gold);
             margin-bottom: 15px;
             text-align: left;
+            font-weight: bold;
         }
         svg { background: #070a0e; border-radius: 12px; border: 1px solid #21262d; max-width: 100%; height: auto; }
-        .slot { fill: #1f242c; stroke: #30363d; stroke-width: 1.5; cursor: pointer; transition: all 0.2s; }
+        .slot { fill: #171b22; stroke: #2d333b; stroke-width: 1.5; cursor: pointer; transition: all 0.2s; }
         .slot:hover { fill: #30363d; }
-        .slot.selected { stroke: var(--accent-gold); stroke-width: 3; }
-        .slot.valid-target { fill: rgba(88, 166, 255, 0.15); stroke: var(--accent-blue); stroke-dasharray: 4; }
+        .slot.selected { stroke: var(--accent-gold); stroke-width: 3; fill: #1f242c; }
+        .slot.valid-target { fill: rgba(88, 166, 255, 0.2); stroke: var(--accent-blue); stroke-dasharray: 4; }
         .piece-user { fill: url(#goldGradient); filter: drop-shadow(0px 3px 4px rgba(0,0,0,0.6)); cursor: pointer; }
         .piece-ai { fill: url(#blueGradient); filter: drop-shadow(0px 3px 4px rgba(0,0,0,0.6)); cursor: pointer; }
+        
+        /* 全屏礼花画布 */
+        #fireworks {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+        /* 狂欢祝贺弹窗 */
+        #victory-modal {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, #1a1f29 0%, #0a0d14 100%);
+            border: 2px solid var(--accent-gold);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.6);
+            z-index: 1000;
+            text-align: center;
+            animation: popup 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popup { from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+        #victory-modal h2 { color: var(--accent-gold); font-size: 32px; margin: 0 0 10px 0; text-shadow: 0 0 10px rgba(212,175,55,0.5); }
+        #victory-modal p { font-size: 18px; color: #ffffff; line-height: 1.6; }
     </style>
 </head>
 <body>
 
+<canvas id="fireworks"></canvas>
+
 <div class="container">
     <h1>Strategic Network</h1>
-    <div class="subtitle">Grid Matrix Simulation // Tactical 4321</div>
+    <div class="subtitle">Cosmic Grid Matrix // Tactical Duel Protocol</div>
     
     <div id="status-panel">
-        <span style="color: #8b949e;">[SYSTEM]</span> <span id="status-text">安全链路已建立。请指派金色核心。</span>
+        <span style="color: #8b949e;">[SYSTEM]</span> <span id="status-text">链路畅通。请选择金色核心开始推进。</span>
     </div>
 
-    <svg id="board-svg" width="500" height="580" viewBox="0 0 500 580">
+    <svg id="board-svg" width="560" height="600" viewBox="0 0 560 600">
         <defs>
             <radialGradient id="goldGradient" cx="30%" cy="30%" r="70%">
                 <stop offset="0%" stop-color="#fff3ad" />
@@ -81,91 +113,80 @@
     </svg>
 </div>
 
+<div id="victory-modal">
+    <h2>🎉 恭喜长官！达成至高胜利！ 🎉</h2>
+    <p>🏆 战术网络分析：您展现了完美无瑕的统帅级操作！<br><span style="color: var(--accent-gold); font-weight: bold;">全网最高算力向您的智慧致敬！🎇🎆</span></p >
+</div>
+
 <script>
     const slotsLayer = document.getElementById('slots-layer');
     const linesLayer = document.getElementById('lines-layer');
     const statusText = document.getElementById('status-text');
+    const victoryModal = document.getElementById('victory-modal');
 
     const nodes = [];
     let idCounter = 0;
+    const R = 23; 
+    const cx = 280; const cy = 300;
 
-    // 完美构建 4-3-2-1 两端对峙棋盘 (共 12 行的沙漏/钻石型延伸)
-    // 行高与间距控制
-    const ySpacing = 42;
-    const xSpacing = 46;
-    const startY = 50;
+    const starLayout = [
+        {r: 0, count: 1, start: 0}, {r: 1, count: 2, start: -0.5}, {r: 2, count: 3, start: -1}, {r: 3, count: 4, start: -1.5},
+        {r: 4, count: 13, start: -6}, {r: 5, count: 12, start: -5.5}, {r: 6, count: 11, start: -5}, {r: 7, count: 10, start: -4.5},
+        {r: 8, count: 9, start: -4}, {r: 9, count: 10, start: -4.5}, {r: 10, count: 11, start: -5}, {r: 11, count: 12, start: -5.5},
+        {r: 12, count: 13, start: -6}, {r: 13, count: 4, start: -1.5}, {r: 14, count: 3, start: -1}, {r: 15, count: 2, start: -0.5}, {r: 16, count: 1, start: 0}
+    ];
 
-    // 每行的棋位数量布局 (完美的4321两端阵型)
-    const rowLayout = [4, 3, 2, 1, 2, 3, 4, 3, 2, 1, 2, 3, 4];
+    const dy = R * Math.sqrt(3);
 
-    rowLayout.forEach((count, rowIndex) => {
-        const startX = 250 - ((count - 1) * xSpacing) / 2;
-        for (let i = 0; i < count; i++) {
-            const x = startX + i * xSpacing;
-            const y = startY + rowIndex * ySpacing;
-            
-            // 阵营划分
+    starLayout.forEach((rowInfo) => {
+        const y = cy + (rowInfo.r - 8) * dy;
+        for (let i = 0; i < rowInfo.count; i++) {
+            const x = cx + (rowInfo.start + i) * (R * 2);
             let piece = null;
-            if (rowIndex <= 2) piece = 'AI';      // 顶部 4, 3, 2 排布归 AI
-            if (rowIndex === 3 && i === 0) piece = 'AI'; // 终点顶角也是 AI (凑满10个)
-            
-            if (rowIndex >= 10) piece = 'USER';   // 底部 2, 3, 4 排布归用户
-            if (rowIndex === 9 && i === 0) piece = 'USER'; // 起点底角也是用户 (凑满10个)
+            if (rowInfo.r <= 3) piece = 'AI';       
+            if (rowInfo.r >= 13) piece = 'USER';    
 
-            nodes.push({ id: idCounter++, x, y, row: rowIndex, col: i, piece });
+            nodes.push({ id: idCounter++, x, y, row: rowInfo.r, col: i, piece });
         }
     });
 
-    // 智能动态连线：基于几何距离建立标准的跳棋 6 方向网络
-    const maxDist = xSpacing + 5; 
     for (let i = 0; i < nodes.length; i++) {
         nodes[i].neighbors = [];
         for (let j = 0; j < nodes.length; j++) {
             if (i === j) continue;
             const dist = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y);
-            // 距离接近一个步长的判定为邻居
-            if (dist > 20 && dist < maxDist) {
+            if (dist > 10 && dist < (R * 2) + 5) {
                 nodes[i].neighbors.push(nodes[j]);
             }
         }
     }
 
-    // 绘制连线层
-    const drawnLines = new Set();
     nodes.forEach(n => {
         n.neighbors.forEach(nb => {
-            const pairId = [n.id, nb.id].sort().join('-');
-            if (!drawnLines.has(pairId)) {
-                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                line.setAttribute("x1", n.x); line.setAttribute("y1", n.y);
-                line.setAttribute("x2", nb.x); line.setAttribute("y2", nb.y);
-                line.setAttribute("stroke", "#1c212b");
-                line.setAttribute("stroke-width", "1.5");
-                linesLayer.appendChild(line);
-                drawnLines.add(pairId);
-            }
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", n.x); line.setAttribute("y1", n.y);
+            line.setAttribute("x2", nb.x); line.setAttribute("y2", nb.y);
+            line.setAttribute("stroke", "#1c212b"); line.setAttribute("stroke-width", "1");
+            linesLayer.appendChild(line);
         });
     });
 
-    let selectedNode = null;
-    let validMoves = [];
+    let selectedNode = null; let validMoves = [];
 
     function render() {
         slotsLayer.innerHTML = '';
         nodes.forEach(n => {
             const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("cx", n.x); circle.setAttribute("cy", n.y); circle.setAttribute("r", 14);
+            circle.setAttribute("cx", n.x); circle.setAttribute("cy", n.y); circle.setAttribute("r", 12);
             circle.setAttribute("class", "slot");
-            
             if (selectedNode === n) circle.classList.add('selected');
             if (validMoves.includes(n)) circle.classList.add('valid-target');
-
             circle.onclick = () => handleNodeClick(n);
             slotsLayer.appendChild(circle);
 
             if (n.piece) {
                 const piece = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                piece.setAttribute("cx", n.x); piece.setAttribute("cy", n.y); piece.setAttribute("r", 11);
+                piece.setAttribute("cx", n.x); piece.setAttribute("cy", n.y); piece.setAttribute("r", 9);
                 piece.setAttribute("class", n.piece === 'USER' ? 'piece-user' : 'piece-ai');
                 piece.onclick = () => handleNodeClick(n);
                 slotsLayer.appendChild(piece);
@@ -173,98 +194,120 @@
         });
     }
 
-    // 计算合法走法（支持单步与直线连跳）
-    function getValidMoves(node) {
+    function getValidMoves(startNode) {
         let moves = [];
-        // 单步
-        node.neighbors.forEach(nb => {
-            if (!nb.piece) moves.push(nb);
-        });
-        // 跳跃
-        node.neighbors.forEach(nb => {
-            if (nb.piece) {
-                const dx = nb.x - node.x;
-                const dy = nb.y - node.y;
-                const targetNode = nodes.find(t => 
-                    Math.abs(t.x - (nb.x + dx)) < 8 && 
-                    Math.abs(t.y - (nb.y + dy)) < 8 && 
-                    !t.piece
-                );
-                if (targetNode) moves.push(targetNode);
-            }
-        });
+        startNode.neighbors.forEach(nb => { if (!nb.piece) moves.push(nb); });
+        let visitedJumps = new Set();
+        function findJumps(currentNode) {
+            currentNode.neighbors.forEach(nb => {
+                if (nb.piece) {
+                    const dx = nb.x - currentNode.x; const dy = nb.y - currentNode.y;
+                    const targetNode = nodes.find(t => Math.abs(t.x - (nb.x + dx)) < 5 && Math.abs(t.y - (nb.y + dy)) < 5 && !t.piece);
+                    if (targetNode && !visitedJumps.has(targetNode.id)) {
+                        visitedJumps.add(targetNode.id); moves.push(targetNode); findJumps(targetNode);
+                    }
+                }
+            });
+        }
+        findJumps(startNode);
         return moves;
     }
 
     function handleNodeClick(node) {
-        if (statusText.innerText.includes("同步中")) return;
-
         if (node.piece === 'USER') {
-            selectedNode = node;
-            validMoves = getValidMoves(node);
-            statusText.innerText = `核心已锁定。指派目标信道。`;
-            render();
+            selectedNode = node; validMoves = getValidMoves(node);
+            statusText.innerText = `核心路径就绪，请指派目标。`; render();
         } else if (validMoves.includes(node) && selectedNode) {
-            node.piece = 'USER';
-            selectedNode.piece = null;
-            selectedNode = null;
-            validMoves = [];
-            render();
-            
-            statusText.innerText = "[SYSTEM] 决策网络正在同步算力...";
-            setTimeout(triggerAIMove, 400);
+            node.piece = 'USER'; selectedNode.piece = null;
+            selectedNode = null; validMoves = []; render();
+            if (checkUserVictory()) { triggerVictory(); return; }
+            statusText.innerText = "[SYSTEM] 智能核心同步算力中...";
+            setTimeout(triggerAIMove, 300);
         }
     }
 
-    // 智能放水 AI：主动推进，但绝不封堵，专门给玩家“送桥”
+    function checkUserVictory() {
+        // 判断底部的10个初始位是否全部没有USER棋子，且顶部的10个位充满了USER棋子
+        const targetAIOslots = nodes.filter(n => n.row <= 3);
+        const userPiecesInTarget = targetAIOslots.filter(n => n.piece === 'USER').length;
+        return userPiecesInTarget === 10;
+    }
+
     function triggerAIMove() {
         let aiPieces = nodes.filter(n => n.piece === 'AI');
         let allPossibleMoves = [];
-
         aiPieces.forEach(p => {
-            let moves = getValidMoves(p);
-            moves.forEach(m => {
-                // 计算这一步能往下走多远
-                const progress = m.y - p.y;
-                allPossibleMoves.push({ from: p, to: m, progress: progress });
+            getValidMoves(p).forEach(m => {
+                allPossibleMoves.push({ from: p, to: m, progress: m.y - p.y });
             });
         });
 
-        if (allPossibleMoves.length === 0) {
-            statusText.innerText = "[SYSTEM] 战术网格已陷入死局。";
-            return;
-        }
+        if (allPossibleMoves.length === 0) return;
 
-        // 高级放水过滤：
-        // 1. 过滤掉直接倒退的垃圾步（防止原地卡死）
-        // 2. 优先选择那些“恰好走到玩家棋子正前方”的步子（给玩家喂棋搭桥）
-        let forwardMoves = allPossibleMoves.filter(m => m.progress >= 0);
-        if (forwardMoves.length === 0) forwardMoves = allPossibleMoves;
-
-        // 寻找能给玩家“做桥”的动作（落点周围有玩家棋子）
-        forwardMoves.forEach(move => {
+        // 强力放水：绝对不允许AI进入底部的玩家老巢大杀特杀，并且在所有走法中，疯狂挑选最能给玩家搭桥、且不造成任何威胁的走法
+        allPossibleMoves.forEach(move => {
             let bridgeScore = 0;
-            move.to.neighbors.forEach(nb => {
-                if (nb.piece === 'USER') bridgeScore += 10; // 靠近玩家，方便玩家跳跃
-            });
+            move.to.neighbors.forEach(nb => { if (nb.piece === 'USER') bridgeScore += 30; }); // 疯狂倒贴玩家
+            // 如果这个走法会阻挡玩家的前进路线，直接扣大分
+            if (move.to.row > 12) bridgeScore -= 100; 
             move.score = move.progress + bridgeScore;
         });
 
-        // 按得分排序（既保证它在往前走，又保证它走得毫无威胁，甚至是在主动奉献身体）
-        forwardMoves.sort((a, b) => b.score - a.score);
+        allPossibleMoves.sort((a, b) => b.score - a.score);
+        const chosenMove = allPossibleMoves[0] || allPossibleMoves[Math.floor(Math.random() * allPossibleMoves.length)];
 
-        // 随机从较优的喂桥动作里选一个
-        const chosenMove = forwardMoves[0];
-
-        chosenMove.to.piece = 'AI';
-        chosenMove.from.piece = null;
+        chosenMove.to.piece = 'AI'; chosenMove.from.piece = null;
         render();
+        statusText.innerText = "[SYSTEM] 节点已更新。等待您的下一步战术。";
+    }
 
-        statusText.innerText = "[SYSTEM] 节点已更新。请调整战术。";
+    // 华丽礼花特效核心
+    const canvas = document.getElementById('fireworks');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resizeCanvas); resizeCanvas();
+
+    function createFirework(x, y) {
+        const colors = ['#d4af37', '#ff4d4f', '#58a6ff', '#52c41a', '#fadb14', '#722ed1'];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        for (let i = 0; i < 60; i++) {
+            particles.push({
+                x: x, y: y,
+                angle: Math.random() * Math.PI * 2,
+                speed: Math.random() * 5 + 2,
+                friction: 0.95, gravity: 0.1,
+                alpha: 1, decay: Math.random() * 0.015 + 0.01,
+                color: color
+            });
+        }
+    }
+
+    function animateFireworks() {
+        requestAnimationFrame(animateFireworks);
+        ctx.fillStyle = 'rgba(13, 17, 23, 0.2)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.speed *= p.friction; p.x += Math.cos(p.angle) * p.speed; p.y += Math.sin(p.angle) * p.speed + p.gravity;
+            p.alpha -= p.decay;
+            if (p.alpha <= 0) { particles.splice(i, 1); continue; }
+            ctx.save(); ctx.globalAlpha = p.alpha; ctx.fillStyle = p.color;
+            ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+        }
+    }
+
+    function triggerVictory() {
+        statusText.innerText = "🏆 CRITICAL VICTORY DETECTED! 🎉";
+        victoryModal.style.display = 'block';
+        animateFireworks();
+        setInterval(() => {
+            createFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.6);
+        }, 300);
     }
 
     render();
 </script>
-
 </body>
 </html>
